@@ -2036,7 +2036,7 @@ async function exportarTodosPDF() {
   const gerarPDF = function () {
 
     // ── CABEÇALHO ──────────────────────────────────────────
-    try { doc.addImage(logo, "PNG", 10, 2, 59, 38); } catch (e) {}
+    try { doc.addImage(logo, "PNG", 10, 3, 59, 38); } catch (e) {}
     doc.setFont("helvetica", "bold"); doc.setFontSize(14);
     doc.text("PREFEITURA MUNICIPAL", 148, 15, null, null, "center");
     doc.setFontSize(10);
