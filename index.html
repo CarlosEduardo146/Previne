@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="previne.png">
-  <title>Sistema de Notificação PREVINE</title>
+  <title>SISTEMA DE NOTIFICAÇÃO</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -83,8 +83,8 @@
       <div class="topoMarca">
         <img src="previne.png">
         <div class="topoTexto">
-          <strong>Previne</strong>
-          <span>Sistema de Notificação</span>
+          <strong>Sistema de Notificação</strong>
+
         </div>
       </div>
       <button class="botaoArea" onclick="abrirLogin()">
@@ -175,7 +175,7 @@
   <div class="sidebar">
     <div class="sidebarBrand">
       <img src="previne.png" alt="Previne">
-      <div><strong>Previne</strong><small> Sistema de Notificação</small></div>
+      <div><strong>Sistema de Notificação</strong></div>
     </div>
     <button onclick="abrirAba('dashboard')"><i class="fi fi-br-stats"></i> Dashboard</button>
     <button onclick="abrirAba('registros')"><i class="fi fi-sr-document"></i> Registros</button>
@@ -1689,7 +1689,7 @@ if(r.tipo) r.tipo.split(',').map(t=>t.trim()).filter(Boolean)
   },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
     scales:{x:{beginAtZero:true,grid:{color:gc},ticks:{stepSize:1,font:tf}},y:{grid:{display:false},ticks:{font:tf}}}}});
  const secEsc=document.getElementById('secaoEscolas');
-const podeVerEscolas = ESCOLAS_ACESSO_GLOBAL.includes((user.escola || "").trim());
+ const podeVerEscolas = (user.escola || "").trim() === "SECRETARA MUNICIPAL DE EDUCAÇÃO DE HORIZONTE" || user.nivel === "admin";
 if(podeVerEscolas && secEsc){
     secEsc.style.display='block';
     const eOrd=Object.entries(escolas).sort((a,b)=>b[1]-a[1]).slice(0,15);
@@ -1864,7 +1864,7 @@ async function relatorioIndividual(protocolo) {
 
   const gerarPDF = function() {
     // ── CABEÇALHO ──────────────────────────────────────────
-    try { doc.addImage(logo, "PNG", 10, 8, 38, 38); } catch(e) {}
+    try { doc.addImage(logo, "PNG", 10, 5, 59, 38); } catch(e) {}
 
     doc.setFont("helvetica","bold"); doc.setFontSize(16);
     doc.text("PREFEITURA MUNICIPAL", 105, 18, null, null, "center");
@@ -2028,84 +2028,127 @@ async function exportarTodosPDF() {
   if (lista.length === 0) { alert("Nenhum registro encontrado!"); return; }
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
+  const doc = new jsPDF({ orientation: "landscape" });
 
-  doc.setFont("helvetica","bold"); doc.setFontSize(18);
-  doc.text("RELATÓRIO GERAL", 105, 20, null, null, "center");
-  doc.setFontSize(12);
-  doc.text("Sistema de Notificação PREVINE", 105, 28, null, null, "center");
-  doc.setDrawColor(46,125,50); doc.line(10, 32, 200, 32);
-  y = 40;
-  doc.setFontSize(10); doc.setFont("helvetica","normal");
-  doc.text("Data de geração: " + new Date().toLocaleDateString("pt-BR"), 10, y); y += 10;
+  const logo = new Image();
+  logo.src = "prefeitura.png";
 
-  doc.setFont("helvetica","bold"); doc.setFontSize(9);
-  doc.setFillColor(46,125,50); doc.setTextColor(255,255,255);
-  doc.rect(10, y, 190, 8, "F");
-  doc.text("PROTOCOLO", 12, y+5.5);
-  doc.text("DATA", 48, y+5.5);
-  doc.text("VÍTIMA", 75, y+5.5);
-  doc.text("TIPIFICAÇÃO", 125, y+5.5);
-  doc.setTextColor(0,0,0);
-  y += 10;
+  const gerarPDF = function () {
 
-  lista.forEach((r, idx) => {
-    const itens = parseTipos(r.tipo);
-    const linhasTipo = Math.ceil(itens.length / 2) || 1;
-    const altLinha = Math.max(10, linhasTipo * 7 + 5);
+    // ── CABEÇALHO ──────────────────────────────────────────
+    try { doc.addImage(logo, "PNG", 10, 2, 59, 38); } catch (e) {}
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+    doc.text("PREFEITURA MUNICIPAL", 148, 15, null, null, "center");
+    doc.setFontSize(10);
+    doc.text("SISTEMA DE NOTIFICAÇÃO PREVINE", 148, 23, null, null, "center");
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+    doc.text("RELATÓRIO GERAL DE OCORRÊNCIAS", 148, 29, null, null, "center");
+    doc.setDrawColor(0); doc.setLineWidth(0.3);
+    doc.line(10, 38, 287, 38);
 
-    if (y + altLinha > 270) { doc.addPage(); y = 20; }
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      "Data de geração: " + new Date().toLocaleDateString("pt-BR") +
+      "   •   Total de registros: " + lista.length,
+      148, 44, null, null, "center"
+    );
+    doc.setTextColor(0, 0, 0);
 
-    if (idx % 2 === 0) {
-      doc.setFillColor(245,245,245);
-      doc.rect(10, y, 190, altLinha, "F");
-    }
+    // ── CABEÇALHO DA TABELA ────────────────────────────────
+    let y = 52;
 
-    doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
-    doc.setTextColor(0,0,0);
-    doc.text(String(r.protocolo||""), 12, y + 6);
-    doc.text(String(r.data||""), 48, y + 6);
-    doc.text(String(r.vitima||"").substring(0, 18), 75, y + 6);
+    const cols = [
+      { label: "Protocolo", x: 10,  w: 28  },
+      { label: "Escola",    x: 40,  w: 90  },
+      { label: "Data",      x: 132, w: 24  },
+      { label: "Vítima",    x: 158, w: 50  },
+      { label: "Tipo",      x: 210, w: 55  },
+      { label: "Status",    x: 267, w: 20  },
+    ];
 
-    if (itens.length === 0) {
-      doc.setTextColor(180,180,180);
-      doc.text("Não informado", 125, y + 6);
-      doc.setTextColor(0,0,0);
-    } else {
-      let tx = 125, ty = y + 2;
-      itens.forEach((item, i) => {
-        const cat = MAPA_TIPO[item] || "moral";
-        const cor = COR_CATEGORIA_PDF[cat] || [100,100,100];
-        const label = item.length > 13 ? item.substring(0,11)+"…" : item;
+    doc.setFillColor(60, 60, 60);
+    doc.rect(10, y, 277, 9, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    cols.forEach(c => doc.text(c.label, c.x + 2, y + 6));
+    doc.setTextColor(0, 0, 0);
+    y += 11;
 
-        doc.setFillColor(cor[0], cor[1], cor[2]);
-        doc.setDrawColor(cor[0], cor[1], cor[2]);
-        doc.roundedRect(tx, ty, 35, 5, 1, 1, "F");
+    // ── LINHAS DA TABELA ───────────────────────────────────
+    lista.forEach((r, idx) => {
+      const EXCLUIR = [
+        "Racismo","Intolerância Religiosa","Sexismo","Diversidade de gênero",
+        "Capacitismo","Outros","Criança","Adolescente","Pai","Mãe","Responsável","Professor"
+      ];
+      const tipos = parseTipos(r.tipo)
+        .filter(t => !EXCLUIR.includes(t) && !t.startsWith("Outros:"))
+        .join(", ");
 
-        doc.setFont("helvetica","bold"); doc.setFontSize(6);
-        doc.setTextColor(255,255,255);
-        doc.text(label, tx + 17.5, ty + 3.6, null, null, "center");
+      const tipoLinhas  = doc.splitTextToSize(tipos || "Não informado", 53);
+      const escolaLinhas = doc.splitTextToSize(r.escola || "", 88);
+      const vitivaLinhas = doc.splitTextToSize(r.vitima || "", 48);
+      const linhaMax = Math.max(tipoLinhas.length, escolaLinhas.length, vitivaLinhas.length);
+      const altLinha = Math.max(9, linhaMax * 4.8 + 4);
 
-        doc.setTextColor(0,0,0);
-        doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+      // Nova página se necessário
+      if (y + altLinha > 195) {
+        doc.addPage();
+        y = 15;
+        // Repetir cabeçalho da tabela
+        doc.setFillColor(99, 153, 34);
+        doc.rect(10, y, 277, 9, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+        doc.setTextColor(255, 255, 255);
+        cols.forEach(c => doc.text(c.label, c.x + 2, y + 6));
+        doc.setTextColor(0, 0, 0);
+        y += 11;
+      }
 
-        if ((i + 1) % 2 === 0) { tx = 125; ty += 7; }
-        else { tx += 37; }
-      });
-    }
+      // Fundo alternado
+      if (idx % 2 === 0) {
+        doc.setFillColor(245, 248, 240);
+        doc.rect(10, y, 277, altLinha, "F");
+      }
 
-    doc.setDrawColor(220,220,220);
-    doc.line(10, y + altLinha, 200, y + altLinha);
+      // Borda da linha
+      doc.setDrawColor(210, 210, 210); doc.setLineWidth(0.1);
+      doc.rect(10, y, 277, altLinha);
 
-    y += altLinha;
-  });
+      // Conteúdo
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+      doc.setTextColor(0, 0, 0);
 
-  doc.setFontSize(8); doc.setTextColor(120,120,120);
-  doc.text("Sistema PREVINE • Relatório gerado automaticamente em " + new Date().toLocaleDateString("pt-BR"), 105, 290, null, null, "center");
-  doc.save("Relatorio_Geral_PREVINE.pdf");
+      const ty = y + 5;
+      doc.text(String(r.protocolo || ""), cols[0].x + 2, ty);
+      doc.text(escolaLinhas,              cols[1].x + 2, ty);
+      doc.text(String(r.data    || ""),   cols[2].x + 2, ty);
+      doc.text(vitivaLinhas,              cols[3].x + 2, ty);
+      doc.text(tipoLinhas,                cols[4].x + 2, ty);
+
+      // Status com cor
+      const isOk = r.status === "Concluído";
+      doc.setTextColor(isOk ? 39 : 133, isOk ? 80 : 79, isOk ? 10 : 11);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(7);
+      doc.text(r.status || "Em andamento", cols[5].x + 2, ty);
+      doc.setTextColor(0, 0, 0);
+
+      y += altLinha;
+    });
+
+    // ── RODAPÉ ─────────────────────────────────────────────
+    doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text(
+      "Sistema PREVINE • Documento oficial gerado automaticamente",
+      148, 202, null, null, "center"
+    );
+
+    doc.save("Relatorio_Geral_PREVINE.pdf");
+  };
+
+  logo.onload  = gerarPDF;
+  logo.onerror = gerarPDF;
 }
-
 // -------------------------------------------------------
 // UTILITÁRIOS
 // -------------------------------------------------------
