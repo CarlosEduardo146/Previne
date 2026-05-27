@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="previne.png">
   <title>Sistema de Notificação PREVINE</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -10,6 +11,7 @@
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-bold-rounded/css/uicons-bold-rounded.css">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
   <link rel="stylesheet" href="./styles.css">
+  
   <style>
     .tagsTipo {
       display: flex;
@@ -168,11 +170,12 @@
 
 <!-- PAINEL -->
 <div class="painel" id="painel">
-
+  <button class="sidebar-toggle" onclick="toggleSidebar()">&#8942;</button>
+  <div class="sidebar-backdrop" onclick="fecharSidebar()"></div>
   <div class="sidebar">
     <div class="sidebarBrand">
       <img src="previne.png" alt="Previne">
-      <div><strong>Previne</strong><small>Sistema de Notificação</small></div>
+      <div><strong>Previne</strong><small> Sistema de Notificação</small></div>
     </div>
     <button onclick="abrirAba('dashboard')"><i class="fi fi-br-stats"></i> Dashboard</button>
     <button onclick="abrirAba('registros')"><i class="fi fi-sr-document"></i> Registros</button>
@@ -204,8 +207,11 @@
                   <input id="perfilNome">
                 </div>
                 <div class="linha">
-                  <div class="campo"><label>Email</label><input id="emailUsuario" readonly></div>
-                  <div class="campo">
+                  <div class="campo" style="flex:1 1 100%;">
+                    <label>Email</label>
+                    <input id="emailUsuario" readonly style="width:100%;box-sizing:border-box;">
+                  </div>
+                  <div class="campo" id="campoNivel">
                     <label>Nível</label>
                     <select id="nivel">
                       <option value="usuario">Usuário</option>
@@ -213,13 +219,6 @@
                     </select>
                   </div>
                 </div>
-                <label>Escola</label>
-                <select id="escolaUsuario">
-                  <option value="">Selecione</option>
-                  <option value="CEI Francisca Monteiro">CEI Francisca Monteiro</option>
-                  <option value="CEI Maria José">CEI Maria José</option>
-                  <option value="Escola Paulo Freire">Escola Paulo Freire</option>
-                </select>
               </div>
               <button class="botaoSalvar" onclick="salvarPerfil()">Salvar Alterações</button>
             </div>
@@ -256,210 +255,558 @@
       </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="aba">
-      <h2>Dashboard</h2>
-      <div class="filtrosDashboard">
-        <select id="filtroMes">
-          <option value="">Todos os meses</option>
-          <option value="0">Jan</option><option value="1">Fev</option>
-          <option value="2">Mar</option><option value="3">Abr</option>
-          <option value="4">Mai</option><option value="5">Jun</option>
-          <option value="6">Jul</option><option value="7">Ago</option>
-          <option value="8">Set</option><option value="9">Out</option>
-          <option value="10">Nov</option><option value="11">Dez</option>
-        </select>
-        <input type="number" id="filtroAno" placeholder="Ano">
-        <input type="text" id="filtroTipo" placeholder="Tipo de violência">
-        <button onclick="carregarGraficos()">Filtrar</button>
+   <!-- DASHBOARD -->
+<div id="dashboard" class="aba">
+  <h2>Dashboard</h2>
+
+  
+
+  <div class="filtrosDashboard">
+    <select id="filtroMes">
+      <option value="">Todos os meses</option>
+      <option value="0">Jan</option><option value="1">Fev</option>
+      <option value="2">Mar</option><option value="3">Abr</option>
+      <option value="4">Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option>
+      <option value="8">Set</option><option value="9">Out</option>
+      <option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <input type="number" id="filtroAno" placeholder="Ano" style="width:90px">
+    <input type="text" id="filtroTipo" placeholder="Tipo de violência" style="min-width:160px">
+    <button onclick="carregarGraficos()">
+      <i class="fi fi-br-filter"></i> Filtrar
+    </button>
+  </div>
+
+  <div class="cardsDashboard">
+    <div class="cardDash">
+      <div class="cardDashIcone" style="background:#eaf3de;color:#27500a">
+        <i class="fi fi-sr-document"></i>
       </div>
-      <div class="cardsDashboard">
-        <div class="cardDash"><h3 id="totalRegistros">0</h3><p>Notificações Registradas</p></div>
-        <div class="cardDash"><h3 id="casosAndamento">0</h3><p>Casos em Andamento</p></div>
-        <div class="cardDash"><h3 id="casosConcluidos">0</h3><p>Casos Concluídos</p></div>
+      <h3 id="totalRegistros">0</h3>
+      <p>Notificações Registradas</p>
+    </div>
+    <div class="cardDash">
+      <div class="cardDashIcone" style="background:#faeeda;color:#854f0b">
+        <i class="fi fi-rr-clock-three"></i>
       </div>
-      <div class="graficos">
-        <div class="grafico"><h3>Notificações por Mês</h3><canvas id="graficoMes"></canvas></div>
-        <div class="grafico"><h3>Distribuição por Sexo</h3><canvas id="graficoSexo"></canvas></div>
-        <div class="grafico"><h3>Distribuição por Idade</h3><canvas id="graficoIdade"></canvas></div>
-        <div class="grafico"><h3>Status dos Casos</h3><canvas id="graficoStatus"></canvas></div>
+      <h3 id="casosAndamento">0</h3>
+      <p>Casos em Andamento</p>
+    </div>
+    <div class="cardDash">
+      <div class="cardDashIcone" style="background:#e6f1fb;color:#185fa5">
+        <i class="fi fi-sr-shield-check"></i>
+      </div>
+      <h3 id="casosConcluidos">0</h3>
+      <p>Casos Concluídos</p>
+    </div>
+    <div class="cardDash">
+      <div class="cardDashIcone" style="background:#fbeaf0;color:#993556">
+        <i class="fi fi-sr-stats"></i>
+      </div>
+      <h3 id="taxaConclusao">0%</h3>
+      <p>Taxa de Conclusão</p>
+    </div>
+  </div>
+
+  <div class="graficos">
+    <div class="grafico grafico-full">
+      <h3>Notificações por Mês</h3>
+      <div style="position:relative;width:100%;height:220px">
+        <canvas id="graficoMes"></canvas>
       </div>
     </div>
 
-    <!-- REGISTROS -->
-    <div id="registros" class="aba">
-      <h2>Registro de Notificação</h2>
-      <div class="abasTopo">
-        <div class="abaItem ativa">1 Ocorrência</div>
-        <div class="abaItem">2 Vítima</div>
-        <div class="abaItem">3 Responsável</div>
-        <div class="abaItem">4 Autor</div>
-        <div class="abaItem">5 Tipificação</div>
-        <div class="abaItem">6 Resumo</div>
-        <div class="abaItem">7 Encaminhamento</div>
+    <div class="grafico">
+      <h3>Distribuição por Sexo</h3>
+      <div class="legGrafico" id="legSexo"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="graficoSexo"></canvas>
       </div>
+    </div>
 
-      <!-- ETAPA 1 -->
-      <div class="etapa ativa">
-        <h3>Dados da Ocorrência</h3>
-        <div class="linha">
-          <div class="campo">Data de preenchimento<input type="date" id="dataPreenchimento"></div>
-          <div class="campo">Onde ocorreu?
+    <div class="grafico">
+      <h3>Distribuição por Idade</h3>
+      <div class="legGrafico" id="legIdade"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="graficoIdade"></canvas>
+      </div>
+    </div>
+
+    <div class="grafico">
+      <h3>Status dos Casos</h3>
+      <div class="legGrafico" id="legStatus"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="graficoStatus"></canvas>
+      </div>
+    </div>
+
+    <div class="grafico">
+      <h3>Tipos Mais Frequentes</h3>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="graficoTipos"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visível apenas para Secretaria e Conselho Tutelar -->
+  <div id="secaoEscolas" style="display:none; margin-top:14px;">
+    <div class="grafico">
+      <h3>
+        Notificações por Escola
+        <span class="badgeRestrito">Acesso restrito</span>
+      </h3>
+      <div class="legGrafico" id="legEscolas"></div>
+      <div id="wrapEscolas" style="position:relative;width:100%;height:320px">
+        <canvas id="graficoEscolas"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+   <!-- FORMULÁRIO DE REGISTRO DE NOTIFICAÇÃO -->
+<div id="registros" class="aba">
+
+  
+  <div class="reg-wrap">
+  
+    <div class="page-hero">
+      <div class="hero-badge">
+        <i class="fi fi-sr-document"></i>
+      </div>
+      <div>
+        <div class="hero-title">
+          Registro de notificação
+          <span class="hero-step-count" id="regStepCount">— etapa 1 de 7</span>
+        </div>
+        <div class="hero-sub">Preencha cada etapa para registrar a ocorrência com segurança</div>
+      </div>
+    </div>
+  
+    <div class="reg-progress-track">
+      <div class="reg-progress-fill" id="regProgressFill" style="width:14.28%"></div>
+    </div>
+  
+    <div class="reg-stepper" id="regStepper">
+      <div class="rs-step rs-active" data-ri="0">
+        <div class="rs-circle"><span>1</span></div>
+        <div class="rs-label">Ocorrência</div>
+      </div>
+      <div class="rs-line" id="rl0"></div>
+      <div class="rs-step" data-ri="1">
+        <div class="rs-circle"><span>2</span></div>
+        <div class="rs-label">Vítima</div>
+      </div>
+      <div class="rs-line" id="rl1"></div>
+      <div class="rs-step" data-ri="2">
+        <div class="rs-circle"><span>3</span></div>
+        <div class="rs-label">Responsável</div>
+      </div>
+      <div class="rs-line" id="rl2"></div>
+      <div class="rs-step" data-ri="3">
+        <div class="rs-circle"><span>4</span></div>
+        <div class="rs-label">Autor</div>
+      </div>
+      <div class="rs-line" id="rl3"></div>
+      <div class="rs-step" data-ri="4">
+        <div class="rs-circle"><span>5</span></div>
+        <div class="rs-label">Tipificação</div>
+      </div>
+      <div class="rs-line" id="rl4"></div>
+      <div class="rs-step" data-ri="5">
+        <div class="rs-circle"><span>6</span></div>
+        <div class="rs-label">Resumo</div>
+      </div>
+      <div class="rs-line" id="rl5"></div>
+      <div class="rs-step" data-ri="6">
+        <div class="rs-circle"><span>7</span></div>
+        <div class="rs-label">Encaminh.</div>
+      </div>
+    </div>
+  
+    <!-- ETAPA 1 — OCORRÊNCIA -->
+    <div class="reg-etapa reg-active reg-card" id="re0">
+      <div class="reg-card-top">
+        <div class="reg-card-icon green"><i class="fi fi-sr-calendar"></i></div>
+        <div>
+          <div class="reg-card-title">Dados da ocorrência</div>
+          <div class="reg-card-sub">Quando e onde aconteceu</div>
+        </div>
+      </div>
+      <div class="reg-card-body">
+        <div class="reg-grid">
+          <div class="reg-field">
+            <span class="reg-label">Data de preenchimento</span>
+            <input type="date" id="dataPreenchimento">
+          </div>
+          <div class="reg-field">
+            <span class="reg-label">Onde ocorreu</span>
             <select id="localTipo">
               <option>Na escola</option>
               <option>No âmbito familiar</option>
               <option>Outros</option>
             </select>
           </div>
-        </div>
-        <div class="campo">Especifique o local (se necessário)<input type="text" id="localDetalhado"></div>
-        <button class="botaoProximo" onclick="proximo()">Próximo</button>
-      </div>
-
-      <!-- ETAPA 2 -->
-      <div class="etapa">
-        <h3>Dados da Vítima</h3>
-        <input type="text" id="nomeVitima" placeholder="Nome">
-        <input type="number" id="idadeVitima" placeholder="Idade">
-        <h4>Raça/Cor</h4>
-        <label><input type="radio" name="raca" value="Branca"> Branca</label>
-        <label><input type="radio" name="raca" value="Preta"> Preta</label>
-        <label><input type="radio" name="raca" value="Parda"> Parda</label>
-        <label><input type="radio" name="raca" value="Indígena"> Indígena</label>
-        <label><input type="radio" name="raca" value="Amarela"> Amarela</label>
-        <h4>Sexo</h4>
-        <label><input type="radio" name="sexo" value="Feminino"> Feminino</label>
-        <label><input type="radio" name="sexo" value="Masculino"> Masculino</label>
-        <label><input type="radio" name="sexo" value="Não informou"> Não informou</label>
-        <h4>Orientação Sexual</h4>
-        <label><input type="radio" name="orientacao" value="Heterossexual"> Heterossexual</label>
-        <label><input type="radio" name="orientacao" value="Homossexual"> Homossexual</label>
-        <label><input type="radio" name="orientacao" value="Bissexual"> Bissexual</label>
-        <label><input type="radio" name="orientacao" value="Ignorado"> Ignorado</label>
-        <h4>Escolaridade</h4>
-        <select id="escolaridade">
-          <option>Creche</option><option>Pré-Escola</option>
-          <option>1º ano</option><option>2º ano</option><option>3º ano</option>
-          <option>4º ano</option><option>5º ano</option><option>6º ano</option>
-          <option>7º ano</option><option>8º ano</option><option>9º ano</option>
-          <option>Ensino Médio</option>
-        </select>
-        <div class="botoesEtapa">
-          <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-          <button class="botaoProximo" onclick="proximo()">Próximo</button>
+          <div class="reg-field reg-grid-full">
+            <span class="reg-label">Especificação do local</span>
+            <input type="text" id="localDetalhado" placeholder="Ex: Pátio da escola, corredor, sala de aula...">
+          </div>
         </div>
       </div>
-
-      <!-- ETAPA 3 -->
-      <div class="etapa">
-        <h3>Responsável</h3>
-        <div class="linha">
-          <div class="campo">Nome do responsável<input type="text" id="responsavel"></div>
-          <div class="campo">Parentesco<input type="text" id="parentesco"></div>
-        </div>
-        <div class="linha">
-          <div class="campo">Telefone<input type="text" id="telefoneResponsavel"></div>
-          <div class="campo">Endereço<input type="text" id="enderecoResponsavel"></div>
-        </div>
-        <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-        <button class="botaoProximo" onclick="proximo()">Próximo</button>
+      <div class="reg-card-footer">
+        <span></span>
+        <button class="reg-btn reg-btn-next" onclick="regGoTo(1)">
+          <i class="fi fi-br-arrow-right"></i> Próximo
+        </button>
       </div>
-
-      <!-- ETAPA 4 -->
-      <div class="etapa">
-        <h3>Autor</h3>
-        <div class="linha">
-          <div class="campo">Nome do autor<input type="text" id="autor"></div>
-          <div class="campo">Idade<input type="number" id="idadeAutor"></div>
-        </div>
-        <div class="linha">
-          <div class="campo">Relação com a vítima<input type="text" id="relacaoAutor"></div>
-        </div>
-        <div class="botoesEtapa">
-          <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-          <button class="botaoProximo" onclick="proximo()">Próximo</button>
+    </div>
+  
+    <!-- ETAPA 2 — VÍTIMA -->
+    <div class="reg-etapa reg-card" id="re1">
+      <div class="reg-card-top">
+        <div class="reg-card-icon green"><i class="fi fi-sr-user"></i></div>
+        <div>
+          <div class="reg-card-title">Dados da vítima</div>
+          <div class="reg-card-sub">Informações sobre a pessoa afetada</div>
         </div>
       </div>
-
-      <!-- ETAPA 5 -->
-      <div class="etapa" id="etapaTipificacao">
-        <h3>Tipificação da Violência</h3>
-        <h4>Violência Física</h4>
-        <label><input type="checkbox" value="Agressão Física"> Agressão Física</label>
-        <label><input type="checkbox" value="Conflito físico"> Conflito físico</label>
-        <label><input type="checkbox" value="Maus-tratos"> Maus-tratos</label>
-        <label><input type="checkbox" value="Negligência"> Negligência</label>
-        <h4>Violência Psicológica</h4>
-        <label><input type="checkbox" value="Ameaça"> Ameaça</label>
-        <label><input type="checkbox" value="Humilhação"> Humilhação</label>
-        <label><input type="checkbox" value="Bullying"> Bullying</label>
-        <label><input type="checkbox" value="Chantagem"> Chantagem</label>
-        <h4>Violência Sexual</h4>
-        <label><input type="checkbox" value="Abuso Sexual"> Abuso Sexual</label>
-        <label><input type="checkbox" value="Assédio Sexual"> Assédio Sexual</label>
-        <label><input type="checkbox" value="Exploração Sexual"> Exploração Sexual</label>
-        <label><input type="checkbox" value="Estupro"> Estupro</label>
-        <h4>Violência Virtual</h4>
-        <label><input type="checkbox" value="Cyberbullying"> Cyberbullying</label>
-        <label><input type="checkbox" value="Assédio virtual"> Assédio virtual</label>
-        <label><input type="checkbox" value="Invasão de dispositivo"> Invasão de dispositivo</label>
-        <h4>Violência Moral</h4>
-        <label><input type="checkbox" value="Calúnia"> Calúnia</label>
-        <label><input type="checkbox" value="Difamação"> Difamação</label>
-        <label><input type="checkbox" value="Injúria"> Injúria</label>
-        <hr>
-        <h3>Motivação da Violência</h3>
-        <label><input type="checkbox" value="Racismo"> Racismo</label>
-        <label><input type="checkbox" value="Intolerância Religiosa"> Intolerância Religiosa</label>
-        <label><input type="checkbox" value="Sexismo"> Sexismo</label>
-        <label><input type="checkbox" value="Diversidade de gênero"> Diversidade de gênero</label>
-        <label><input type="checkbox" value="Capacitismo"> Capacitismo</label>
-        <label><input type="checkbox" value="Outros"> Outros</label>
-        <hr>
-        <h3>Quem praticou a violência?</h3>
-        <label><input type="checkbox" value="Criança"> Criança</label>
-        <label><input type="checkbox" value="Adolescente"> Adolescente</label>
-        <label><input type="checkbox" value="Pai"> Pai</label>
-        <label><input type="checkbox" value="Mãe"> Mãe</label>
-        <label><input type="checkbox" value="Responsável"> Responsável</label>
-        <label><input type="checkbox" value="Professor"> Professor</label>
-        <div class="botoesEtapa">
-          <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-          <button class="botaoProximo" onclick="proximo()">Próximo</button>
+      <div class="reg-card-body">
+        <div class="reg-grid" style="margin-bottom:12px">
+          <div class="reg-field">
+            <span class="reg-label">Nome completo</span>
+            <input type="text" id="nomeVitima" placeholder="Nome da vítima">
+          </div>
+          <div class="reg-field">
+            <span class="reg-label">Idade</span>
+            <input type="number" id="idadeVitima" placeholder="Ex: 12">
+          </div>
+          <div class="reg-field reg-grid-full">
+            <span class="reg-label">Escolaridade</span>
+            <select id="escolaridade">
+              <option>Creche</option><option>Pré-Escola</option>
+              <option>1º ano</option><option>2º ano</option><option>3º ano</option>
+              <option>4º ano</option><option>5º ano</option><option>6º ano</option>
+              <option>7º ano</option><option>8º ano</option><option>9º ano</option>
+              <option>Ensino Médio</option>
+            </select>
+          </div>
+        </div>
+        <div class="reg-divider"></div>
+        <div class="reg-group-label">Raça / cor</div>
+        <div class="reg-pill-row" style="margin-bottom:1rem">
+          <label class="reg-pill"><input type="radio" name="raca" value="Branca"><span class="reg-dot"></span>Branca</label>
+          <label class="reg-pill"><input type="radio" name="raca" value="Preta"><span class="reg-dot"></span>Preta</label>
+          <label class="reg-pill"><input type="radio" name="raca" value="Parda"><span class="reg-dot"></span>Parda</label>
+          <label class="reg-pill"><input type="radio" name="raca" value="Indígena"><span class="reg-dot"></span>Indígena</label>
+          <label class="reg-pill"><input type="radio" name="raca" value="Amarela"><span class="reg-dot"></span>Amarela</label>
+        </div>
+        <div class="reg-divider"></div>
+        <div class="reg-group-label">Sexo</div>
+        <div class="reg-pill-row" style="margin-bottom:1rem">
+          <label class="reg-pill"><input type="radio" name="sexo" value="Feminino"><span class="reg-dot"></span>Feminino</label>
+          <label class="reg-pill"><input type="radio" name="sexo" value="Masculino"><span class="reg-dot"></span>Masculino</label>
+          <label class="reg-pill"><input type="radio" name="sexo" value="Não informou"><span class="reg-dot"></span>Não informou</label>
+        </div>
+        <div class="reg-divider"></div>
+        <div class="reg-group-label">Orientação sexual</div>
+        <div class="reg-pill-row">
+          <label class="reg-pill"><input type="radio" name="orientacao" value="Heterossexual"><span class="reg-dot"></span>Heterossexual</label>
+          <label class="reg-pill"><input type="radio" name="orientacao" value="Homossexual"><span class="reg-dot"></span>Homossexual</label>
+          <label class="reg-pill"><input type="radio" name="orientacao" value="Bissexual"><span class="reg-dot"></span>Bissexual</label>
+          <label class="reg-pill"><input type="radio" name="orientacao" value="Ignorado"><span class="reg-dot"></span>Ignorado</label>
         </div>
       </div>
-
-      <!-- ETAPA 6 -->
-      <div class="etapa">
-        <h3>Resumo da Ocorrência</h3>
-        <textarea id="resumo" placeholder="Descreva resumidamente o que aconteceu..." rows="5"></textarea>
-        <div class="botoesEtapa">
-          <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-          <button class="botaoProximo" onclick="proximo()">Próximo</button>
+      <div class="reg-card-footer">
+        <button class="reg-btn reg-btn-ghost" onclick="regGoTo(0)">
+          <i class="fi fi-br-arrow-left"></i> Voltar
+        </button>
+        <button class="reg-btn reg-btn-next" onclick="regGoTo(2)">
+          <i class="fi fi-br-arrow-right"></i> Próximo
+        </button>
+      </div>
+    </div>
+  
+    <!-- ETAPA 3 — RESPONSÁVEL -->
+    <div class="reg-etapa reg-card" id="re2">
+      <div class="reg-card-top">
+        <div class="reg-card-icon green"><i class="fi fi-sr-users"></i></div>
+        <div>
+          <div class="reg-card-title">Responsável</div>
+          <div class="reg-card-sub">Dados do responsável pela vítima</div>
         </div>
       </div>
-
-      <!-- ETAPA 7 -->
-      <div class="etapa">
-        <h3>Encaminhamento</h3>
-        <textarea id="encaminhamento" placeholder="Descreva quais ações serão tomadas..." rows="5"></textarea>
-        <div class="botoesEtapa">
-          <button class="botaoVoltar" onclick="voltar()">Voltar</button>
-          <button class="btnSalvarnotificação" onclick="salvarNotificacao()">Salvar Notificação</button>
+      <div class="reg-card-body">
+        <div class="reg-grid">
+          <div class="reg-field">
+            <span class="reg-label">Nome do responsável</span>
+            <input type="text" id="responsavel" placeholder="Nome completo">
+          </div>
+          <div class="reg-field">
+            <span class="reg-label">Parentesco</span>
+            <input type="text" id="parentesco" placeholder="Ex: Mãe, Pai, Avó...">
+          </div>
+          <div class="reg-field">
+            <span class="reg-label">Telefone</span>
+            <input type="text" id="telefoneResponsavel" placeholder="(00) 00000-0000">
+          </div>
+          <div class="reg-field">
+            <span class="reg-label">Endereço</span>
+            <input type="text" id="enderecoResponsavel" placeholder="Rua, número, bairro">
+          </div>
         </div>
+      </div>
+      <div class="reg-card-footer">
+        <button class="reg-btn reg-btn-ghost" onclick="regGoTo(1)">
+          <i class="fi fi-br-arrow-left"></i> Voltar
+        </button>
+        <button class="reg-btn reg-btn-next" onclick="regGoTo(3)">
+          <i class="fi fi-br-arrow-right"></i> Próximo
+        </button>
+      </div>
+    </div>
+  
+    <!-- ETAPA 4 — AUTOR -->
+<div class="reg-etapa reg-card" id="re3">
+  <div class="reg-card-top">
+    <div class="reg-card-icon amber"><i class="fi fi-sr-user-slash"></i></div>
+    <div>
+      <div class="reg-card-title">Autor da violência</div>
+      <div class="reg-card-sub">Dados de quem praticou o ato</div>
+    </div>
+  </div>
+  <div class="reg-card-body">
+    <div class="reg-grid">
+      <div class="reg-field">
+        <span class="reg-label">Nome do autor</span>
+        <input type="text" id="autor" placeholder="Nome (se conhecido)">
+      </div>
+      <div class="reg-field">
+        <span class="reg-label">Idade</span>
+        <input type="number" id="idadeAutor" placeholder="Ex: 35">
+      </div>
+      <div class="reg-field reg-grid-full">
+        <span class="reg-label">Relação com a vítima</span>
+        <input type="text" id="relacaoAutor" placeholder="Ex: Colega de escola, familiar, desconhecido...">
       </div>
     </div>
 
+    <div class="reg-divider"></div>
+    <div class="reg-group-label">Quem praticou</div>
+    <div class="reg-pill-row">
+      <label class="reg-pill"><input type="checkbox" value="Criança"><span class="reg-dot"></span>Criança</label>
+      <label class="reg-pill"><input type="checkbox" value="Adolescente"><span class="reg-dot"></span>Adolescente</label>
+      <label class="reg-pill"><input type="checkbox" value="Pai"><span class="reg-dot"></span>Pai</label>
+      <label class="reg-pill"><input type="checkbox" value="Mãe"><span class="reg-dot"></span>Mãe</label>
+      <label class="reg-pill"><input type="checkbox" value="Responsável"><span class="reg-dot"></span>Responsável</label>
+      <label class="reg-pill"><input type="checkbox" value="Professor"><span class="reg-dot"></span>Professor</label>
+    </div>
+
+    <div class="reg-divider"></div>
+    <div class="reg-group-label">Outros — especifique</div>
+    <div class="reg-pill-row" style="align-items:center;">
+      <label class="reg-pill">
+        <input type="checkbox" id="checkOutros" value="Outros" onchange="toggleOutros(this)">
+        <span class="reg-dot"></span>Outros
+      </label>
+    </div>
+    <input type="text" id="outrosTexto" placeholder="Especifique quem praticou..."
+      style="display:none;margin-top:8px;width:100%;padding:8px 12px;border:1px solid #ce93d8;border-radius:8px;font-size:13px;outline:none;background:#fdf6ff;box-sizing:border-box;">
+
+  </div>
+  <div class="reg-card-footer">
+    <button class="reg-btn reg-btn-ghost" onclick="regGoTo(2)">
+      <i class="fi fi-br-arrow-left"></i> Voltar
+    </button>
+    <button class="reg-btn reg-btn-next" onclick="regGoTo(4)">
+      <i class="fi fi-br-arrow-right"></i> Próximo
+    </button>
+  </div>
+</div>
+  
+    <!-- ETAPA 5 — TIPIFICAÇÃO -->
+    <div class="reg-etapa reg-card" id="re4">
+      <div class="reg-card-top">
+        <div class="reg-card-icon amber"><i class="fi fi-sr-triangle-warning"></i></div>
+        <div>
+          <div class="reg-card-title">Tipificação da violência</div>
+          <div class="reg-card-sub">Selecione todos os tipos que se aplicam</div>
+        </div>
+      </div>
+      <div class="reg-card-body" id="etapaTipificacao">
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Violência física</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag fisica"><input type="checkbox" value="Agressão Física">Agressão física</label>
+            <label class="reg-tag fisica"><input type="checkbox" value="Conflito físico">Conflito físico</label>
+            <label class="reg-tag fisica"><input type="checkbox" value="Maus-tratos">Maus-tratos</label>
+            <label class="reg-tag fisica"><input type="checkbox" value="Negligência">Negligência</label>
+          </div>
+        </div>
+  
+        <div class="reg-divider"></div>
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Violência psicológica</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag psico"><input type="checkbox" value="Ameaça">Ameaça</label>
+            <label class="reg-tag psico"><input type="checkbox" value="Humilhação">Humilhação</label>
+            <label class="reg-tag psico"><input type="checkbox" value="Bullying">Bullying</label>
+            <label class="reg-tag psico"><input type="checkbox" value="Chantagem">Chantagem</label>
+          </div>
+        </div>
+  
+        <div class="reg-divider"></div>
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Violência sexual</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag sexual"><input type="checkbox" value="Abuso Sexual">Abuso sexual</label>
+            <label class="reg-tag sexual"><input type="checkbox" value="Assédio Sexual">Assédio sexual</label>
+            <label class="reg-tag sexual"><input type="checkbox" value="Exploração Sexual">Exploração sexual</label>
+            <label class="reg-tag sexual"><input type="checkbox" value="Estupro">Estupro</label>
+          </div>
+        </div>
+  
+        <div class="reg-divider"></div>
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Violência virtual</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag virtual"><input type="checkbox" value="Cyberbullying">Cyberbullying</label>
+            <label class="reg-tag virtual"><input type="checkbox" value="Assédio virtual">Assédio virtual</label>
+            <label class="reg-tag virtual"><input type="checkbox" value="Invasão de dispositivo">Invasão de dispositivo</label>
+          </div>
+        </div>
+  
+        <div class="reg-divider"></div>
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Violência moral</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag moral"><input type="checkbox" value="Calúnia">Calúnia</label>
+            <label class="reg-tag moral"><input type="checkbox" value="Difamação">Difamação</label>
+            <label class="reg-tag moral"><input type="checkbox" value="Injúria">Injúria</label>
+          </div>
+        </div>
+  
+        <div class="reg-divider"></div>
+  
+        <div class="reg-tipo-section">
+          <div class="reg-tipo-head">Motivação</div>
+          <div class="reg-pill-row">
+            <label class="reg-tag motiv"><input type="checkbox" value="Racismo">Racismo</label>
+            <label class="reg-tag motiv"><input type="checkbox" value="Intolerância Religiosa">Intolerância religiosa</label>
+            <label class="reg-tag motiv"><input type="checkbox" value="Sexismo">Sexismo</label>
+            <label class="reg-tag motiv"><input type="checkbox" value="Diversidade de gênero">Diversidade de gênero</label>
+            <label class="reg-tag motiv"><input type="checkbox" value="Capacitismo">Capacitismo</label>
+            <label class="reg-tag motiv"><input type="checkbox" value="Outros">Outros</label>
+          </div>
+        </div>
+  
+        
+      </div>
+      <div class="reg-card-footer">
+        <button class="reg-btn reg-btn-ghost" onclick="regGoTo(3)">
+          <i class="fi fi-br-arrow-left"></i> Voltar
+        </button>
+        <button class="reg-btn reg-btn-next" onclick="regGoTo(5)">
+          <i class="fi fi-br-arrow-right"></i> Próximo
+        </button>
+      </div>
+    </div>
+  
+    <!-- ETAPA 6 — RESUMO -->
+    <div class="reg-etapa reg-card" id="re5">
+      <div class="reg-card-top">
+        <div class="reg-card-icon green"><i class="fi fi-sr-document"></i></div>
+        <div>
+          <div class="reg-card-title">Resumo da ocorrência</div>
+          <div class="reg-card-sub">Descreva o que aconteceu</div>
+        </div>
+      </div>
+      <div class="reg-card-body">
+        <div class="reg-field">
+          <span class="reg-label">Descrição dos fatos</span>
+          <textarea id="resumo" placeholder="Relate os detalhes relevantes de forma objetiva e clara. Inclua contexto, pessoas envolvidas e circunstâncias."></textarea>
+        </div>
+      </div>
+      <div class="reg-card-footer">
+        <button class="reg-btn reg-btn-ghost" onclick="regGoTo(4)">
+          <i class="fi fi-br-arrow-left"></i> Voltar
+        </button>
+        <button class="reg-btn reg-btn-next" onclick="regGoTo(6)">
+          <i class="fi fi-br-arrow-right"></i> Próximo
+        </button>
+      </div>
+    </div>
+  
+    <!-- ETAPA 7 — ENCAMINHAMENTO -->
+    <div class="reg-etapa reg-card" id="re6">
+      <div class="reg-card-top">
+        <div class="reg-card-icon green"><i class="fi fi-sr-paper-plane"></i></div>
+        <div>
+          <div class="reg-card-title">Encaminhamento</div>
+          <div class="reg-card-sub">Ações e providências a adotar</div>
+        </div>
+      </div>
+      <div class="reg-card-body">
+        <div class="reg-field" style="margin-bottom:1.25rem">
+          <span class="reg-label">Descrição das ações</span>
+          <textarea id="encaminhamento" placeholder="Descreva os encaminhamentos e providências que serão adotadas a partir desta notificação..."></textarea>
+        </div>
+        <div class="reg-notice">
+          <i class="fi fi-sr-shield-check"></i>
+          <div>
+            <div class="reg-notice-title">Pronto para salvar</div>
+            <div class="reg-notice-sub">Verifique as informações antes de confirmar. Um número de protocolo será gerado automaticamente ao salvar.</div>
+          </div>
+        </div>
+      </div>
+      <div class="reg-card-footer">
+        <button class="reg-btn reg-btn-ghost" onclick="regGoTo(5)">
+          <i class="fi fi-br-arrow-left"></i> Voltar
+        </button>
+        <button class="reg-btn reg-btn-save btnSalvarnotificação" onclick="salvarNotificacao()">
+          <i class="fi fi-sr-disk"></i> Salvar notificação
+        <!-- Motivação — visível só no PDF -->
+<div style="position:absolute;left:-9999px;height:0;overflow:hidden;pointer-events:none">
+  <div class="reg-tipo-section">
+    <div class="reg-tipo-head">Motivação</div>
+    <div class="reg-pill-row">
+      <label class="reg-tag motiv"><input type="checkbox" value="Racismo">Racismo</label>
+      ...
+    </div>
+  </div>
+  <div class="reg-tipo-section">
+    <div class="reg-tipo-head">Quem praticou</div>
+    ...
+  </div>
+</div></button>
+      </div>
+    </div>
+  
+  </div>
+  
+ 
+  
+  </div>
     <!-- RELATÓRIOS -->
     <div id="relatorios" class="aba">
       <h2>Menu de Relatórios</h2>
       <div class="cardsRelatorio">
         <div class="cardRelatorio" onclick="relatorioMensal()"><h3>Relatório Mensal</h3><p>Notificações por mês</p></div>
         <div class="cardRelatorio" onclick="relatorioVitimas()"><h3>Relatório de Vítimas</h3><p>Lista de vítimas registradas</p></div>
-        <div class="cardRelatorio" onclick="relatorioTipos()"><h3>Relatório por Tipo</h3><p>Tipos de violência registrados</p></div>
+        <div class="cardRelatorio" onclick="relatorioEscola()"><h3>Relatório por Escola</h3><p>Notificações filtradas por escola</p></div>
         <div class="cardRelatorio" onclick="exportarTodosPDF()"><h3>Exportar Relatório Geral</h3><p>Gerar relatório completo em PDF</p></div>
       </div>
       <div id="resultadoRelatorio"></div>
+      <div id="filtroEscolaWrap" style="display:none; margin-bottom:12px;">
+        <label style="font-weight:600; font-size:13px; margin-right:8px;">Escola:</label>
+        <select id="selectEscolaRelatorio" onchange="aplicarFiltroEscola()"
+          style="padding:6px 12px; border:1px solid #ccc; border-radius:8px; font-size:13px; min-width:280px;">
+        </select>
+      </div>
       <table id="tabelaRelatorios">
         <thead>
           <tr>
@@ -474,83 +821,7 @@
     <!-- CONSULTA -->
 <div id="consulta" class="aba">
 
-  <style>
-    .header-consulta { margin-bottom: 2rem; }
-    .header-consulta h2 { font-size: 22px; font-weight: 600; color: #1b1b1b; display: flex; align-items: center; gap: 10px; }
-    .header-consulta p { font-size: 14px; color: #666; margin-top: 4px; }
-    .header-icon { width: 40px; height: 40px; background: #eaf3de; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-
-    .search-card-novo { background: #fff; border: 0.5px solid #e4e2da; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .search-label-novo { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
-    .search-row-novo { display: flex; gap: 10px; align-items: stretch; }
-    .search-input-wrap-novo { flex: 1; position: relative; }
-    .search-input-wrap-novo .icone-busca { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #aaa; pointer-events: none; }
-    .search-input-novo { width: 100%; height: 48px; border: 1.5px solid #e4e2da; border-radius: 12px; padding: 0 16px 0 44px; font-size: 15px; color: #2c2c2a; background: #fff; transition: border-color .2s, box-shadow .2s; outline: none; }
-    .search-input-novo:focus { border-color: #97c459; box-shadow: 0 0 0 3px rgba(99,153,34,.12); }
-    .search-input-novo::placeholder { color: #aaa; }
-
-    .btn-buscar-novo { height: 48px; padding: 0 24px; background: #27500a; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .15s, transform .1s; white-space: nowrap; }
-    .btn-buscar-novo:hover { background: #1b3d07; }
-    .btn-buscar-novo:active { transform: scale(0.97); }
-
-    .search-hints-novo { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
-    .hint-chip-novo { font-size: 12px; color: #3b6d11; background: #eaf3de; border: 1px solid #c0dd97; border-radius: 20px; padding: 3px 10px; cursor: pointer; transition: background .15s; }
-    .hint-chip-novo:hover { background: #c0dd97; }
-
-    .estado-vazio-novo { text-align: center; padding: 4rem 2rem; }
-    .estado-vazio-icone-novo { width: 80px; height: 80px; background: #eaf3de; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 32px; }
-    .estado-vazio-novo h3 { font-size: 17px; font-weight: 500; color: #2c2c2a; margin-bottom: 6px; }
-    .estado-vazio-novo p { font-size: 14px; color: #666; max-width: 300px; margin: 0 auto; }
-
-    .estado-erro-novo { text-align: center; padding: 3rem 2rem; }
-    .estado-erro-icone-novo { width: 64px; height: 64px; background: #fcebeb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 28px; }
-    .estado-erro-novo h3 { font-size: 16px; font-weight: 500; color: #2c2c2a; margin-bottom: 4px; }
-    .estado-erro-novo p { font-size: 13px; color: #666; }
-
-    .resultados-count-novo { font-size: 13px; color: #666; margin-bottom: 1rem; }
-    .resultados-count-novo strong { color: #3b6d11; }
-
-    .card-resultado-novo { background: #fff; border: 0.5px solid #e4e2da; border-radius: 16px; margin-bottom: 1rem; overflow: hidden; transition: box-shadow .2s, transform .15s; }
-    .card-resultado-novo:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
-
-    .card-resultado-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 0.5px solid #e4e2da; background: #f8f9f7; flex-wrap: wrap; gap: 8px; }
-    .protocolo-badge-novo { background: #eaf3de; border: 1px solid #c0dd97; color: #3b6d11; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-family: monospace; }
-    .escola-info-novo { font-size: 13px; color: #666; display: flex; align-items: center; gap: 5px; }
-    .status-badge-andamento { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: #faeeda; color: #854f0b; border: 1px solid #fac775; white-space: nowrap; }
-    .status-badge-concluido { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; background: #eaf3de; color: #3b6d11; border: 1px solid #c0dd97; white-space: nowrap; }
-
-    .card-resultado-body { display: grid; grid-template-columns: 1fr 1fr 1fr; }
-    .card-secao { padding: 1rem 1.25rem; border-right: 0.5px solid #e4e2da; }
-    .card-secao:last-child { border-right: none; }
-    .card-secao-titulo { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
-    .campo-label-novo { font-size: 11px; color: #aaa; margin-bottom: 1px; }
-    .campo-valor-novo { font-size: 14px; color: #2c2c2a; margin-bottom: 8px; }
-    .campo-valor-novo.destaque { font-weight: 600; }
-
-    .card-resultado-footer { padding: .875rem 1.25rem; border-top: 0.5px solid #e4e2da; display: flex; gap: 8px; background: #f8f9f7; flex-wrap: wrap; }
-    .btn-acao-novo { height: 36px; padding: 0 16px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background .15s, transform .1s; border: 1px solid transparent; }
-    .btn-acao-novo:active { transform: scale(0.97); }
-    .btn-pdf-novo { background: #fff; border-color: #e4e2da; color: #2c2c2a; }
-    .btn-pdf-novo:hover { background: #f1f0eb; }
-    .btn-status-and-novo { background: #faeeda; border-color: #fac775; color: #854f0b; }
-    .btn-status-and-novo:hover { background: #fef3c7; }
-    .btn-status-ok-novo { background: #eaf3de; border-color: #c0dd97; color: #3b6d11; }
-    .btn-status-ok-novo:hover { background: #d4edba; }
-    .btn-excluir-novo { background: #fcebeb; border-color: #f7c1c1; color: #a32d2d; }
-    .btn-excluir-novo:hover { background: #fdd; }
-
-    .skeleton-novo { animation: pulse-novo 1.5s ease-in-out infinite; }
-    @keyframes pulse-novo { 0%,100%{opacity:1} 50%{opacity:.4} }
-    .skel-block-novo { background: #e4e2da; border-radius: 8px; margin-bottom: 8px; }
-
-    @media(max-width:640px) {
-      .card-resultado-body { grid-template-columns: 1fr; }
-      .card-secao { border-right: none; border-bottom: 0.5px solid #e4e2da; }
-      .card-secao:last-child { border-bottom: none; }
-      .search-row-novo { flex-direction: column; }
-    }
-  </style>
-
+  
   <div class="header-consulta">
     <div style="display:flex;align-items:center;gap:12px">
       <div class="header-icon">🔍</div>
@@ -758,6 +1029,26 @@ function renderTags(tipoStr) {
     '</div>';
 }
 
+function renderTagsSemMotiv(tipoStr) {
+  if (!tipoStr || tipoStr.trim() === "") {
+    return '<span style="color:#999;font-size:12px;">Não informado</span>';
+  }
+  const excluir = ["Racismo","Intolerância Religiosa","Sexismo","Diversidade de gênero",
+    "Capacitismo","Outros","Criança","Adolescente","Pai","Mãe","Responsável","Professor"];
+  const itens = tipoStr.split(",").map(t => t.trim())
+    .filter(t => t.length > 0 && !excluir.includes(t));
+  if (itens.length === 0) {
+    return '<span style="color:#999;font-size:12px;">Não informado</span>';
+  }
+  return '<div class="tagsTipo">' +
+    itens.map(t => {
+      const cat = MAPA_TIPO[t] || "moral";
+      const icone = ICONE_TIPO[cat] || "•";
+      return `<span class="tagTipo ${cat}">${icone} ${t}</span>`;
+    }).join("") +
+  '</div>';
+}
+
 function parseTipos(tipoStr) {
   if (!tipoStr || tipoStr.trim() === "") return [];
   return tipoStr.split(",").map(t => t.trim()).filter(t => t.length > 0);
@@ -900,8 +1191,17 @@ function voltar() {
 async function salvarNotificacao() {
   const user = carregarSessao() || {};
   const tipos = [];
-  document.querySelectorAll('#etapaTipificacao input[type="checkbox"]:checked')
-    .forEach(c => tipos.push(c.value));
+
+  document.querySelectorAll('#registros input[type="checkbox"]').forEach(c => {
+  if (c.checked) {
+    if (c.id === "checkOutros") {
+      const texto = document.getElementById("outrosTexto").value.trim();
+      tipos.push(texto ? "Outros: " + texto : "Outros");
+    } else {
+      tipos.push(c.value);
+    }
+  }
+});
 
   const todos = await dbSelect("relatorios");
   const protocolo = gerarProtocolo(todos.length + 1);
@@ -937,18 +1237,14 @@ async function salvarNotificacao() {
   await adicionarNotificacao("Nova notificação: " + novo.vitima, novo.escola);
   alert("Notificação registrada!\nProtocolo: " + protocolo);
   limparFormulario();
-  etapaAtual = 0;
-  mostrarEtapa();
+  regGoTo(0);
 }
 
 // -------------------------------------------------------
 // USUÁRIOS
 // -------------------------------------------------------
-function gerarSenha(tamanho = 8) {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let s = "";
-  for (let i = 0; i < tamanho; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
-  return s;
+function gerarSenha() {
+  return "12345678";
 }
 
 async function cadastrarUsuario() {
@@ -1050,6 +1346,8 @@ async function obterRelatoriosFiltrados() {
 }
 
 async function carregarRelatorios() {
+  const fw = document.getElementById("filtroEscolaWrap");
+if (fw) fw.style.display = "none";
   const lista = await obterRelatoriosFiltrados();
   const tbody = document.querySelector("#tabelaRelatorios tbody");
   if (!tbody) return;
@@ -1073,7 +1371,55 @@ async function relatorioVitimas() {
   lista.forEach(r => renderLinhaRelatorio(tbody, r));
 }
 
-async function relatorioTipos() { await relatorioVitimas(); }
+
+async function relatorioEscola() {
+  const user = carregarSessao() || {};
+  const lista = await obterRelatoriosFiltrados();
+  const global = temAcessoGlobal(user);
+
+  const escolas = [...new Set(lista.map(r => r.escola).filter(Boolean))].sort();
+
+  const wrap = document.getElementById("filtroEscolaWrap");
+  const sel  = document.getElementById("selectEscolaRelatorio");
+  if (wrap && sel) {
+    sel.innerHTML = "";
+    if (global) {
+      sel.innerHTML += `<option value="">Todas as escolas</option>`;
+    }
+    escolas.forEach(e => {
+      const opt = document.createElement("option");
+      opt.value = e;
+      opt.textContent = e;
+      // Se o usuário não tem acesso global, pré-seleciona a escola dele
+      if (!global && e === user.escola) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    wrap.style.display = "block";
+  }
+
+  aplicarFiltroEscola();
+}
+
+async function aplicarFiltroEscola() {
+  const user = carregarSessao() || {};
+  const lista = await obterRelatoriosFiltrados();
+  const sel = document.getElementById("selectEscolaRelatorio");
+  const escolhida = sel ? sel.value : "";
+  const tbody = document.querySelector("#tabelaRelatorios tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  const filtrado = escolhida ? lista.filter(r => r.escola === escolhida) : lista;
+  filtrado.forEach(r => renderLinhaRelatorio(tbody, r));
+
+  const res = document.getElementById("resultadoRelatorio");
+  if (res) {
+    res.innerHTML = filtrado.length > 0
+      ? `<p style="font-size:13px;color:#555;margin-bottom:8px;"><strong>${filtrado.length}</strong> registro${filtrado.length > 1 ? "s" : ""} encontrado${filtrado.length > 1 ? "s" : ""}${escolhida ? " para <em>" + escolhida + "</em>" : ""}</p>`
+      : `<p style="color:#c62828;font-size:13px;">Nenhum registro encontrado para esta escola.</p>`;
+  }
+}
+
+async function relatorioTipos() { await relatorioEscola(); }
 
 function renderLinhaRelatorio(tabela, r) {
   const linha = tabela.insertRow();
@@ -1085,7 +1431,7 @@ function renderLinhaRelatorio(tabela, r) {
   linha.insertCell(3).innerHTML = r.vitima || "";
 
   const celTipo = linha.insertCell(4);
-  celTipo.innerHTML = renderTags(r.tipo);
+  celTipo.innerHTML = renderTagsSemMotiv(r.tipo);
 
   linha.insertCell(5).innerHTML = `<button onclick="alterarStatus('${proto}')">${r.status || "Em andamento"}</button>`;
   linha.insertCell(6).innerHTML = `
@@ -1133,7 +1479,6 @@ async function buscarRegistro() {
       <div class="skel-block-novo" style="width:100%;height:80px;margin-top:8px"></div>
     </div>`;
 
-  // obterRelatoriosFiltrados() já aplica o controle de acesso correto
   const lista = await obterRelatoriosFiltrados();
 
   const resultados = lista.filter(r =>
@@ -1155,16 +1500,11 @@ async function buscarRegistro() {
 
   resultados.forEach(r => {
     const isOk = r.status === "Concluído";
-
-    const dataFmt = r.data
-      ? r.data.split("-").reverse().join("/")
-      : "—";
-
+    const dataFmt = r.data ? r.data.split("-").reverse().join("/") : "—";
     const idSafe = (r.protocolo || "").replace(/[^a-zA-Z0-9]/g, "_");
 
     html += `
     <div class="card-resultado-novo">
-
       <div class="card-resultado-header">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span class="protocolo-badge-novo">${r.protocolo || ""}</span>
@@ -1176,9 +1516,7 @@ async function buscarRegistro() {
           ${isOk ? "✓ Concluído" : "⏳ Em andamento"}
         </span>
       </div>
-
       <div class="card-resultado-body">
-
         <div class="card-secao">
           <div class="card-secao-titulo">📍 Ocorrência</div>
           <div class="campo-label-novo">Data</div>
@@ -1186,7 +1524,6 @@ async function buscarRegistro() {
           <div class="campo-label-novo">Local</div>
           <div class="campo-valor-novo">${r.local || "—"}</div>
         </div>
-
         <div class="card-secao">
           <div class="card-secao-titulo">👤 Vítima</div>
           <div class="campo-label-novo">Nome</div>
@@ -1196,17 +1533,21 @@ async function buscarRegistro() {
           <div class="campo-label-novo">Raça / Cor</div>
           <div class="campo-valor-novo">${r.raca || "—"}</div>
         </div>
-
         <div class="card-secao">
           <div class="card-secao-titulo">⚠️ Tipificação</div>
           <div id="tags_consulta_${idSafe}"></div>
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#bf360c;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Motivação</div>
+            <div id="tags_motiv_${idSafe}"></div>
+          </div>
+          <div style="margin-top:8px">
+            <div style="font-size:10px;font-weight:600;color:#6a1b9a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Quem praticou</div>
+            <div id="tags_pratic_${idSafe}"></div>
+          </div>
         </div>
-
       </div>
-
       <div class="card-resultado-footer">
-        <button class="btn-acao-novo btn-pdf-novo"
-          onclick="relatorioIndividual('${r.protocolo}')">
+        <button class="btn-acao-novo btn-pdf-novo" onclick="relatorioIndividual('${r.protocolo}')">
           <i class="fi fi-sr-document"></i> Ver PDF
         </button>
         <button class="btn-acao-novo ${isOk ? "btn-status-ok-novo" : "btn-status-and-novo"}"
@@ -1218,16 +1559,37 @@ async function buscarRegistro() {
           <i class="fi fi-sr-trash"></i> Excluir
         </button>
       </div>
-
     </div>`;
   });
 
   div.innerHTML = html;
 
+  // ← AGORA DENTRO DA FUNÇÃO, resultados existe corretamente
+  const MOTIV_V  = ["Racismo","Intolerância Religiosa","Sexismo","Diversidade de gênero","Capacitismo","Outros"];
+  const PRATIC_V = ["Criança","Adolescente","Pai","Mãe","Responsável","Professor"];
+
   resultados.forEach(r => {
     const idSafe = (r.protocolo || "").replace(/[^a-zA-Z0-9]/g, "_");
-    const el = document.getElementById("tags_consulta_" + idSafe);
-    if (el) el.innerHTML = renderTags(r.tipo);
+    const todos  = parseTipos(r.tipo);
+
+    const elTipo = document.getElementById("tags_consulta_" + idSafe);
+    if (elTipo) elTipo.innerHTML = renderTagsSemMotiv(r.tipo);
+
+    const elMotiv = document.getElementById("tags_motiv_" + idSafe);
+    if (elMotiv) {
+      const itens = todos.filter(t => MOTIV_V.includes(t));
+      elMotiv.innerHTML = itens.length
+        ? '<div class="tagsTipo">' + itens.map(t => `<span class="tagTipo motiv">🎯 ${t}</span>`).join("") + '</div>'
+        : '<span style="color:#999;font-size:12px;">Não informado</span>';
+    }
+
+    const elPratic = document.getElementById("tags_pratic_" + idSafe);
+    if (elPratic) {
+      const itens = todos.filter(t => PRATIC_V.includes(t) || t.startsWith("Outros"));
+      elPratic.innerHTML = itens.length
+        ? '<div class="tagsTipo">' + itens.map(t => `<span class="tagTipo praticou">👤 ${t}</span>`).join("") + '</div>'
+        : '<span style="color:#999;font-size:12px;">Não informado</span>';
+    }
   });
 }
 
@@ -1235,68 +1597,118 @@ async function alterarStatusConsulta(protocolo) {
   await alterarStatus(protocolo);
   buscarRegistro();
 }
-
 // -------------------------------------------------------
-// GRÁFICOS
+// CRIAR GRÁFICO (Chart.js)
 // -------------------------------------------------------
-async function carregarGraficos() {
-  const lista = await obterRelatoriosFiltrados();
-  let masculino = 0, feminino = 0, outros = 0;
-  let crianca = 0, adolescente = 0, adulto = 0;
-  let meses = Array(12).fill(0);
-  let andamento = 0, concluido = 0;
-
-  lista.forEach(r => {
-    if (r.sexo === "Masculino") masculino++;
-    else if (r.sexo === "Feminino") feminino++;
-    else outros++;
-
-    const idade = parseInt(r.idade);
-    if (idade <= 12) crianca++;
-    else if (idade <= 17) adolescente++;
-    else adulto++;
-
-    if (r.data) { const d = new Date(r.data); meses[d.getMonth()]++; }
-    if (r.status === "Concluído") concluido++; else andamento++;
-  });
-
-  document.getElementById("totalRegistros").innerText  = lista.length;
-  document.getElementById("casosAndamento").innerText  = andamento;
-  document.getElementById("casosConcluidos").innerText = concluido;
-
-  criarGrafico("graficoMes", {
-    type: "line",
-    data: {
-      labels: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
-      datasets: [{ label: "Notificações", data: meses, borderColor: "#2e7d32", backgroundColor: "rgba(46,125,50,0.1)", tension: 0.4, fill: true }]
-    },
-    options: { plugins: { legend: { display: false } } }
-  });
-
-  criarGrafico("graficoSexo", {
-    type: "doughnut",
-    data: { labels: ["Masculino","Feminino","Outros"], datasets: [{ data: [masculino, feminino, outros], backgroundColor: ["#42a5f5","#ec407a","#9e9e9e"] }] },
-    options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" }
-  });
-
-  criarGrafico("graficoIdade", {
-    type: "bar",
-    data: { labels: ["Crianças","Adolescentes","Adultos"], datasets: [{ data: [crianca, adolescente, adulto], backgroundColor: ["#66bb6a","#ffa726","#ef5350"] }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
-
-  criarGrafico("graficoStatus", {
-    type: "doughnut",
-    data: { labels: ["Em andamento","Concluído"], datasets: [{ data: [andamento, concluido], backgroundColor: ["#ffa726","#66bb6a"] }] },
-    options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" }
-  });
-}
+const _chartInstances = {};
 
 function criarGrafico(id, config) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
-  if (canvas.chart) canvas.chart.destroy();
-  canvas.chart = new Chart(canvas, config);
+  if (_chartInstances[id]) {
+    _chartInstances[id].destroy();
+  }
+  _chartInstances[id] = new Chart(canvas, config);
+}
+// -------------------------------------------------------
+// GRÁFICOS
+// -------------------------------------------------------
+async function carregarGraficos() {
+  const lista  = await obterRelatoriosFiltrados();
+  const user   = carregarSessao() || {};
+  const global = temAcessoGlobal(user);
+
+  let m=0,f=0,o=0,cr=0,ad=0,au=0,and=0,conc=0;
+  const meses=Array(12).fill(0), tipos={}, escolas={};
+
+  lista.forEach(r => {
+    r.sexo==='Masculino'?m++:r.sexo==='Feminino'?f++:o++;
+    const id=parseInt(r.idade);id<=12?cr++:id<=17?ad++:au++;
+    if(r.data){const d=new Date(r.data);meses[d.getMonth()]++;}
+    r.status==='Concluído'?conc++:and++;
+    const EXCLUIR_TIPOS = [
+  "Racismo","Intolerância Religiosa","Sexismo","Diversidade de gênero","Capacitismo","Outros",
+  "Criança","Adolescente","Pai","Mãe","Responsável","Professor"
+];
+if(r.tipo) r.tipo.split(',').map(t=>t.trim()).filter(Boolean)
+  .filter(t => !EXCLUIR_TIPOS.includes(t) && !t.startsWith("Outros:"))
+  .forEach(t=>{tipos[t]=(tipos[t]||0)+1;});
+    if(global&&r.escola) escolas[r.escola]=(escolas[r.escola]||0)+1;
+  });
+
+  const tot=lista.length, taxa=tot>0?Math.round(conc/tot*100):0;
+  document.getElementById('totalRegistros').innerText  = tot;
+  document.getElementById('casosAndamento').innerText  = and;
+  document.getElementById('casosConcluidos').innerText = conc;
+  const txEl=document.getElementById('taxaConclusao');
+  if(txEl) txEl.innerText = taxa+'%';
+
+  function leg(id,labels,cores){
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=labels.map((l,i)=>
+      `<span><b style="background:${cores[i]}"></b>${l}</span>`
+    ).join('');
+  }
+
+  const tf={size:11}, gc='rgba(0,0,0,0.04)';
+
+  criarGrafico('graficoMes',{type:'line',data:{
+    labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+    datasets:[{data:meses,borderColor:'#639922',backgroundColor:'rgba(99,153,34,.07)',
+      tension:.4,fill:true,pointBackgroundColor:'#639922',pointRadius:4,pointHoverRadius:6,borderWidth:2}]
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:gc},ticks:{font:tf}},y:{beginAtZero:true,grid:{color:gc},ticks:{stepSize:1,font:tf}}}}});
+
+  const cSex=['#378ADD','#D4537E','#B4B2A9'];
+  leg('legSexo',[`Masculino — ${m}`,`Feminino — ${f}`,`Não informou — ${o}`],cSex);
+  criarGrafico('graficoSexo',{type:'doughnut',data:{
+    labels:['Masculino','Feminino','Não informou'],
+    datasets:[{data:[m,f,o],backgroundColor:cSex,borderWidth:3,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}});
+
+  const cId=['#639922','#EF9F27','#E24B4A'];
+  leg('legIdade',[`Crianças ≤12 — ${cr}`,`Adolescentes — ${ad}`,`Adultos — ${au}`],cId);
+  criarGrafico('graficoIdade',{type:'bar',data:{
+    labels:['Crianças','Adolescentes','Adultos'],
+    datasets:[{data:[cr,ad,au],backgroundColor:cId,borderRadius:6,borderWidth:0}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{beginAtZero:true,grid:{color:gc},ticks:{stepSize:1,font:tf}},x:{grid:{display:false},ticks:{font:tf}}}}});
+
+  const cSt=['#EF9F27','#639922'];
+  leg('legStatus',[`Em andamento — ${and}`,`Concluído — ${conc}`],cSt);
+  criarGrafico('graficoStatus',{type:'doughnut',data:{
+    labels:['Em andamento','Concluído'],
+    datasets:[{data:[and,conc],backgroundColor:cSt,borderWidth:3,borderColor:'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}});
+
+  const tOrd=Object.entries(tipos).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  criarGrafico('graficoTipos',{type:'bar',data:{
+    labels:tOrd.map(([k])=>k.length>20?k.slice(0,18)+'…':k),
+    datasets:[{data:tOrd.map(([,v])=>v),backgroundColor:'#97C459',borderRadius:6,borderWidth:0}]
+  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{beginAtZero:true,grid:{color:gc},ticks:{stepSize:1,font:tf}},y:{grid:{display:false},ticks:{font:tf}}}}});
+ const secEsc=document.getElementById('secaoEscolas');
+const podeVerEscolas = ESCOLAS_ACESSO_GLOBAL.includes((user.escola || "").trim());
+if(podeVerEscolas && secEsc){
+    secEsc.style.display='block';
+    const eOrd=Object.entries(escolas).sort((a,b)=>b[1]-a[1]).slice(0,15);
+    const eL=eOrd.map(([k])=>k.length>38?k.slice(0,36)+'…':k);
+    const eD=eOrd.map(([,v])=>v);
+    const w=document.getElementById('wrapEscolas');
+    if(w) w.style.height=Math.max(300,eOrd.length*44+60)+'px';
+    const cEsc=['#27500a','#3B6D11','#639922','#97C459','#C0DD97','#185FA5','#378ADD',
+      '#85B7EB','#993556','#D4537E','#854F0B','#EF9F27','#534AB7','#7F77DD','#888780'];
+    leg('legEscolas',eL,cEsc.slice(0,eL.length));
+    criarGrafico('graficoEscolas',{type:'bar',data:{
+      labels:eL,
+      datasets:[{data:eD,backgroundColor:cEsc.slice(0,eD.length),borderRadius:6,borderWidth:0}]
+    },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,grid:{color:gc},ticks:{stepSize:1,font:tf}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  } else if(secEsc){
+    secEsc.style.display='none';
+  }
 }
 
 // -------------------------------------------------------
@@ -1366,9 +1778,19 @@ function abrirPerfil() {
   if (!user) return;
   document.getElementById("perfilNome").value = user.nome;
   document.getElementById("emailUsuario").value = user.email;
+
+
+  const nivelSelect = document.getElementById("nivel");
+  if (nivelSelect) nivelSelect.value = user.nivel || "usuario";
+
+
+  const campoNivel = document.getElementById("campoNivel");
+  if (campoNivel) {
+    campoNivel.style.display = user.nivel === "admin" ? "" : "none";
+  }
+
   document.getElementById("perfilModal").style.display = "flex";
 }
-
 function fecharPerfil() { document.getElementById("perfilModal").style.display = "none"; }
 
 async function salvarPerfil() {
@@ -1435,123 +1857,169 @@ async function relatorioIndividual(protocolo) {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  let y = 20;
+  let y = 0;
 
   const logo = new Image();
   logo.src = "prefeitura.png";
 
   const gerarPDF = function() {
-    try {
-      doc.addImage(logo, "PNG", 1, 2, 75, 40);
-    } catch(e) {}
+    // ── CABEÇALHO ──────────────────────────────────────────
+    try { doc.addImage(logo, "PNG", 10, 8, 38, 38); } catch(e) {}
 
-    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+    doc.setFont("helvetica","bold"); doc.setFontSize(16);
     doc.text("PREFEITURA MUNICIPAL", 105, 18, null, null, "center");
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.text("SISTEMA DE NOTIFICAÇÃO PREVINE", 105, 26, null, null, "center");
-    doc.setFontSize(10); doc.setFont("helvetica", "normal");
-    doc.text("RELATÓRIO INDIVIDUAL DE OCORRÊNCIA", 105, 34, null, null, "center");
-    doc.setDrawColor(46,125,50); doc.setLineWidth(0.2); doc.line(10, 42, 200, 42);
-    y = 52;
+    doc.setFont("helvetica","normal"); doc.setFontSize(9);
+    doc.text("RELATÓRIO INDIVIDUAL DE OCORRÊNCIA", 105, 33, null, null, "center");
+    doc.setDrawColor(0); doc.setLineWidth(0.3);
+    doc.line(10, 50, 200, 50);
+    y = 60;
 
-    doc.setFont("helvetica","bold"); doc.setFontSize(11);
-    doc.text("DADOS DA OCORRÊNCIA", 105, y, null, null, "center"); y += 6;
-    doc.setFont("helvetica","normal"); doc.setFontSize(10);
-    doc.setDrawColor(46,125,50);
-    doc.rect(10, y, 190, 8); doc.text("Protocolo: " + (r.protocolo||""), 12, y+6); y += 10;
-    doc.rect(10, y, 190, 8); doc.text("Data: " + (r.data||""), 12, y+6); y += 14;
+ // ── FUNÇÃO AUXILIAR: seção com espaço acima ──────
+function secao(titulo) {
 
-    doc.setFont("helvetica","bold"); doc.text("DADOS DA VÍTIMA", 105, y, null, null, "center"); y += 6;
-    doc.setFont("helvetica","normal");
-    doc.rect(10,y,95,8); doc.rect(105,y,95,8);
-    doc.text("Nome: "+(r.vitima||""), 12, y+6); doc.text("Idade: "+(r.idade||""), 107, y+6); y += 10;
-    doc.rect(10,y,95,8); doc.rect(105,y,95,8);
-    doc.text("Sexo: "+(r.sexo||""), 12, y+6);
-    doc.text("Raça/Cor: "+(r.raca||""), 107, y+6); y += 14;
+// espaço acima do tópico
+y += 6;
 
-    doc.setFont("helvetica","bold"); doc.setFontSize(11);
-    doc.text("TIPIFICAÇÃO DA VIOLÊNCIA", 105, y, null, null, "center"); y += 6;
+doc.setFont("helvetica", "bold");
+doc.setFontSize(10);
+doc.setTextColor(0,0,0);
 
-    const itens = parseTipos(r.tipo);
+// título centralizado
+doc.text(titulo, 105, y, null, null, "center");
 
-    if (itens.length === 0) {
-      doc.setFont("helvetica","italic"); doc.setFontSize(10);
-      doc.setTextColor(150,150,150);
-      doc.rect(10, y, 190, 10);
-      doc.text("Não informado", 12, y+7);
+// espaço abaixo do título
+y += 6;
+}
+    // ── FUNÇÃO AUXILIAR: campo caixa simples ────────────────
+    function campo(label, valor, x, w, h) {
+      h = h || 10;
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.2);
+      doc.rect(x, y, w, h);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9);
       doc.setTextColor(0,0,0);
-      y += 14;
-    } else {
-      const tagW = 58;
-      const tagH = 8;
-      const tagPad = 3;
-      const colMax = 3;
-      const linhas = Math.ceil(itens.length / colMax);
-      const alturaBloco = linhas * (tagH + tagPad) + 8;
-
-      doc.setDrawColor(200,200,200);
-      doc.setFillColor(250,250,250);
-      doc.rect(10, y, 190, alturaBloco, "FD");
-
-      let tagX = 13, tagY = y + 4;
-      let colAtual = 0;
-
-      itens.forEach((item) => {
-        const cat = MAPA_TIPO[item] || "moral";
-        const cor = COR_CATEGORIA_PDF[cat] || [100,100,100];
-
-        doc.setFillColor(cor[0], cor[1], cor[2]);
-        doc.setDrawColor(cor[0], cor[1], cor[2]);
-        doc.roundedRect(tagX, tagY, tagW, tagH, 2, 2, "F");
-
-        doc.setFont("helvetica","bold");
-        doc.setFontSize(7.5);
-        doc.setTextColor(255,255,255);
-        const label = item.length > 22 ? item.substring(0,20)+"…" : item;
-        doc.text(label, tagX + tagW/2, tagY + 5.5, null, null, "center");
-
-        colAtual++;
-        if (colAtual >= colMax) {
-          colAtual = 0;
-          tagX = 13;
-          tagY += tagH + tagPad;
-        } else {
-          tagX += tagW + tagPad;
-        }
-      });
-
-      doc.setTextColor(0,0,0);
-      y += alturaBloco + 6;
+      doc.text((label ? label + ": " : "") + (valor || ""), x + 2, y + 6);
     }
 
-    doc.setFont("helvetica","bold"); doc.setFontSize(11);
-    doc.text("RESUMO DA OCORRÊNCIA", 105, y, null, null, "center"); y += 6;
-    doc.setFont("helvetica","normal"); doc.setFontSize(10);
-    const resumoTexto = doc.splitTextToSize(r.resumo || "Sem resumo informado.", 183);
-    const altResumo = Math.max(20, resumoTexto.length * 6 + 8);
-    doc.setDrawColor(46,125,50);
-    doc.rect(10,y,190,altResumo);
-    doc.text(resumoTexto, 12, y+6);
-    y += altResumo + 6;
+    // ── FUNÇÃO AUXILIAR: campo largo (largura total) ────────
+    function campoFull(label, valor, h) {
+      campo(label, valor, 10, 190, h);
+      y += (h || 10) + 2;
+    }
 
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFont("helvetica","bold"); doc.setFontSize(11);
-    doc.text("ENCAMINHAMENTO", 105, y, null, null, "center"); y += 6;
-    doc.setFont("helvetica","normal"); doc.setFontSize(10);
-    const encTexto = doc.splitTextToSize(r.encaminhamento || "Sem encaminhamento informado.", 183);
-    const altEnc = Math.max(20, encTexto.length * 6 + 8);
-    doc.rect(10,y,190,altEnc);
-    doc.text(encTexto, 12, y+6);
+    // ── FUNÇÃO AUXILIAR: dois campos lado a lado ────────────
+    function campoDuplo(label1, val1, label2, val2) {
+      campo(label1, val1, 10,  95, 10);
+      campo(label2, val2, 105, 95, 10);
+      y += 12;
+    }
 
-    doc.setFontSize(8); doc.setTextColor(120,120,120);
-    doc.text("Sistema PREVINE • Documento oficial gerado automaticamente", 105, 285, null, null, "center");
-    doc.save("PREVINE_" + r.protocolo + ".pdf");
+    // ── FUNÇÃO AUXILIAR: campo de texto longo ───────────────
+    function campoTexto(label, valor) {
+      const linhas = doc.splitTextToSize(valor || "Não informado.", 183);
+      const alt = Math.max(18, linhas.length * 5.5 + 6);
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.2);
+      doc.rect(10, y, 190, alt);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9);
+      doc.setTextColor(0,0,0);
+      doc.text(linhas, 12, y + 6);
+      y += alt + 3;
+    }
+
+    // ── FUNÇÃO AUXILIAR: verificar quebra de página ─────────
+    function checkPage(space) {
+      if (y + space > 275) { doc.addPage(); y = 20; }
+    }
+
+    // ======================================================
+    // DADOS DA OCORRÊNCIA
+    // ======================================================
+    secao("DADOS DA OCORRÊNCIA");
+    campoFull("Protocolo", r.protocolo);
+    campoFull("Data", r.data);
+    campoFull("Escola", r.escola);
+    campoFull("Local", r.local);
+    campoFull("Especificação do local", r.local_detalhado);
+
+    // ======================================================
+    // DADOS DA VÍTIMA
+    // ======================================================
+    checkPage(60);
+    secao("DADOS DA VÍTIMA");
+    campoFull("Nome", r.vitima);
+    campoDuplo("Idade", r.idade, "Sexo", r.sexo);
+    campoDuplo("Raça / Cor", r.raca, "Orientação sexual", r.orientacao);
+    campoFull("Escolaridade", r.escolaridade);
+
+    // ======================================================
+    // RESPONSÁVEL
+    // ======================================================
+    checkPage(55);
+    secao("RESPONSÁVEL");
+    campoFull("Nome", r.responsavel);
+    campoDuplo("Parentesco", r.parentesco, "Telefone", r.telefone);
+    campoFull("Endereço", r.endereco);
+
+    /// ======================================================
+// AUTOR DA VIOLÊNCIA
+// ======================================================
+y += 6;
+y -= 6;
+
+checkPage(20);
+secao("AUTOR DA VIOLÊNCIA");
+campoDuplo("Nome", r.autor, "Idade", r.idade_autor);
+campoFull("Relação com a vítima", r.relacao_autor);
+    // — Quem praticou
+    const todosItens = parseTipos(r.tipo);
+    const MOTIV_VALS  = ["Racismo","Intolerância Religiosa","Sexismo","Diversidade de gênero","Capacitismo","Outros"];
+    const PRATIC_VALS = ["Criança","Adolescente","Pai","Mãe","Responsável","Professor"];
+    const itensTipo   = todosItens.filter(t => !MOTIV_VALS.includes(t) && !PRATIC_VALS.includes(t) && !t.startsWith("Outros:"));
+    const itensMotiv  = todosItens.filter(t => MOTIV_VALS.includes(t) && !t.startsWith("Outros:"));
+    const itensPratic = todosItens.filter(t => PRATIC_VALS.includes(t) || t.startsWith("Outros"));
+
+    campoFull("Quem praticou", itensPratic.length ? itensPratic.join(", ") : "Não informado");
+
+    // ======================================================
+    // TIPIFICAÇÃO DA VIOLÊNCIA
+    // ======================================================
+    checkPage(30);
+    secao("TIPIFICAÇÃO DA VIOLÊNCIA");
+    campoFull("Tipos", itensTipo.length ? itensTipo.join(", ") : "Não informado");
+
+    // ======================================================
+    // MOTIVAÇÃO
+    // ======================================================
+    checkPage(20);
+    secao("MOTIVAÇÃO DA VIOLÊNCIA");
+    campoFull("Motivação", itensMotiv.length ? itensMotiv.join(", ") : "Não informado");
+
+    // ======================================================
+    // RESUMO DA OCORRÊNCIA
+    // ======================================================
+    checkPage(40);
+    secao("RESUMO DA OCORRÊNCIA");
+    campoTexto("", r.resumo);
+
+    // ======================================================
+    // ENCAMINHAMENTO
+    // ======================================================
+    checkPage(40);
+    secao("ENCAMINHAMENTO");
+    campoTexto("", r.encaminhamento);
+
+    // ── RODAPÉ ─────────────────────────────────────────────
+    doc.setFontSize(7); doc.setTextColor(150,150,150);
+    doc.text("Sistema PREVINE • Documento oficial gerado automaticamente", 105, 290, null, null, "center");
+
+    const nomeArquivo = (r.vitima || "Vitima").replace(/[^a-zA-Z0-9À-ÿ _-]/g, "").trim();
+doc.save("PREVINE_" + r.protocolo + "_" + nomeArquivo + ".pdf");
   };
 
-  logo.onload = gerarPDF;
+  logo.onload  = gerarPDF;
   logo.onerror = gerarPDF;
 }
-
 // -------------------------------------------------------
 // PDF GERAL
 // -------------------------------------------------------
@@ -1641,14 +2109,14 @@ async function exportarTodosPDF() {
 // -------------------------------------------------------
 // UTILITÁRIOS
 // -------------------------------------------------------
-function limparFormulario() {
+async function limparFormulario() {
   document.querySelectorAll("#registros input, #registros textarea, #registros select")
-    .forEach(el => { el.value = ""; });
+    .forEach(el => { if (el.type !== "radio" && el.type !== "checkbox") el.value = ""; });
   document.querySelectorAll("#registros input[type='radio'], #registros input[type='checkbox']")
     .forEach(el => el.checked = false);
 }
 
-function atualizarBotaoFlutuante() {
+async function atualizarBotaoFlutuante() {
   const botao = document.querySelector(".botaoFlutuante");
   if (!botao) return;
   const painelVisivel = document.getElementById("painel")?.style.display === "block";
@@ -1656,7 +2124,7 @@ function atualizarBotaoFlutuante() {
   botao.style.display = painelVisivel && logado ? "flex" : "none";
 }
 
-function abrirNovoRegistroAtalho() {
+async function abrirNovoRegistroAtalho() {
   abrirAba("registros");
   etapaAtual = 0;
   mostrarEtapa();
@@ -1664,7 +2132,7 @@ function abrirNovoRegistroAtalho() {
   atualizarBotaoFlutuante();
 }
 
-function abrirRegistroPublico() {
+async function abrirRegistroPublico() {
   document.getElementById("inicio").style.display = "none";
   document.getElementById("painel").style.display = "block";
   document.getElementById("painel").classList.add("modoPublicoRegistro");
@@ -1698,6 +2166,46 @@ atualizarBotaoFlutuante();
 
 window.addEventListener("resize", atualizarBotaoFlutuante);
 window.addEventListener("load",   atualizarBotaoFlutuante);
+
+async function regGoTo(i) {
+    const n = 7;
+    document.querySelectorAll('.reg-etapa').forEach((el, j) => {
+      el.classList.toggle('reg-active', j === i);
+    });
+    document.querySelectorAll('.rs-step').forEach((el, j) => {
+      el.classList.remove('rs-active', 'rs-done');
+      if (j === i) el.classList.add('rs-active');
+      else if (j < i) el.classList.add('rs-done');
+    });
+    for (let j = 0; j < 6; j++) {
+      const l = document.getElementById('rl' + j);
+      if (l) l.classList.toggle('rs-done', j < i);
+    }
+    document.getElementById('regProgressFill').style.width = ((i + 1) / n * 100).toFixed(1) + '%';
+    document.getElementById('regStepCount').textContent = '— etapa ' + (i + 1) + ' de ' + n;
+    const wrap = document.querySelector('.reg-wrap');
+    if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function toggleOutros(checkbox) {
+  const input = document.getElementById("outrosTexto");
+  input.style.display = checkbox.checked ? "block" : "none";
+  if (!checkbox.checked) input.value = "";
+}
+
+async function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('aberta');
+    document.querySelector('.sidebar-backdrop').classList.toggle('aberto');
+  }
+async function fecharSidebar() {
+    document.querySelector('.sidebar').classList.remove('aberta');
+    document.querySelector('.sidebar-backdrop').classList.remove('aberto');
+  }
+  // fecha ao clicar em qualquer botão do menu
+  document.querySelectorAll('.sidebar button').forEach(btn => {
+    btn.addEventListener('click', fecharSidebar);
+  });
+
 </script>
 
 </body>
